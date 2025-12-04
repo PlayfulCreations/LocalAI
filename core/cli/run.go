@@ -8,7 +8,6 @@ import (
 	"time"
 
 	"github.com/mudler/LocalAI/core/application"
-	cli_api "github.com/mudler/LocalAI/core/cli/api"
 	cliContext "github.com/mudler/LocalAI/core/cli/context"
 	"github.com/mudler/LocalAI/core/config"
 	"github.com/mudler/LocalAI/core/http"
@@ -25,7 +24,7 @@ type RunCMD struct {
 
 	ExternalBackends             []string      `env:"LOCALAI_EXTERNAL_BACKENDS,EXTERNAL_BACKENDS" help:"A list of external backends to load from gallery on boot" group:"backends"`
 	BackendsPath                 string        `env:"LOCALAI_BACKENDS_PATH,BACKENDS_PATH" type:"path" default:"${basepath}/backends" help:"Path containing backends used for inferencing" group:"backends"`
-	BackendsSystemPath           string        `env:"LOCALAI_BACKENDS_SYSTEM_PATH,BACKEND_SYSTEM_PATH" type:"path" default:"/usr/share/localai/backends" help:"Path containing system backends used for inferencing" group:"backends"`
+	BackendsSystemPath           string        `env:"LOCALAI_BACKENDS_SYSTEM_PATH,BACKEND_SYSTEM_PATH" type:"path" default:"/var/lib/local-ai/backends" help:"Path containing system backends used for inferencing" group:"backends"`
 	ModelsPath                   string        `env:"LOCALAI_MODELS_PATH,MODELS_PATH" type:"path" default:"${basepath}/models" help:"Path containing models used for inferencing" group:"storage"`
 	GeneratedContentPath         string        `env:"LOCALAI_GENERATED_CONTENT_PATH,GENERATED_CONTENT_PATH" type:"path" default:"/tmp/generated/content" help:"Location for generated content (e.g. images, audio, videos)" group:"storage"`
 	UploadPath                   string        `env:"LOCALAI_UPLOAD_PATH,UPLOAD_PATH" type:"path" default:"/tmp/localai/upload" help:"Path to store uploads from files api" group:"storage"`
@@ -52,6 +51,7 @@ type RunCMD struct {
 	UploadLimit                        int      `env:"LOCALAI_UPLOAD_LIMIT,UPLOAD_LIMIT" default:"15" help:"Default upload-limit in MB" group:"api"`
 	APIKeys                            []string `env:"LOCALAI_API_KEY,API_KEY" help:"List of API Keys to enable API authentication. When this is set, all the requests must be authenticated with one of these API keys" group:"api"`
 	DisableWebUI                       bool     `env:"LOCALAI_DISABLE_WEBUI,DISABLE_WEBUI" default:"false" help:"Disables the web user interface. When set to true, the server will only expose API endpoints without serving the web interface" group:"api"`
+	DisableRuntimeSettings             bool     `env:"LOCALAI_DISABLE_RUNTIME_SETTINGS,DISABLE_RUNTIME_SETTINGS" default:"false" help:"Disables the runtime settings. When set to true, the server will not load the runtime settings from the runtime_settings.json file" group:"api"`
 	DisablePredownloadScan             bool     `env:"LOCALAI_DISABLE_PREDOWNLOAD_SCAN" help:"If true, disables the best-effort security scanner before downloading any files." group:"hardening" default:"false"`
 	OpaqueErrors                       bool     `env:"LOCALAI_OPAQUE_ERRORS" default:"false" help:"If true, all error responses are replaced with blank 500 errors. This is intended only for hardening against information leaks and is normally not recommended." group:"hardening"`
 	UseSubtleKeyComparison             bool     `env:"LOCALAI_SUBTLE_KEY_COMPARISON" default:"false" help:"If true, API Key validation comparisons will be performed using constant-time comparisons rather than simple equality. This trades off performance on each request for resiliancy against timing attacks." group:"hardening"`
@@ -75,6 +75,7 @@ type RunCMD struct {
 	DisableGalleryEndpoint             bool     `env:"LOCALAI_DISABLE_GALLERY_ENDPOINT,DISABLE_GALLERY_ENDPOINT" help:"Disable the gallery endpoints" group:"api"`
 	MachineTag                         string   `env:"LOCALAI_MACHINE_TAG,MACHINE_TAG" help:"Add Machine-Tag header to each response which is useful to track the machine in the P2P network" group:"api"`
 	LoadToMemory                       []string `env:"LOCALAI_LOAD_TO_MEMORY,LOAD_TO_MEMORY" help:"A list of models to load into memory at startup" group:"models"`
+	AgentJobRetentionDays              int      `env:"LOCALAI_AGENT_JOB_RETENTION_DAYS,AGENT_JOB_RETENTION_DAYS" default:"30" help:"Number of days to keep agent job history (default: 30)" group:"api"`
 
 	Version bool
 }
@@ -98,6 +99,7 @@ func (r *RunCMD) Run(ctx *cliContext.Context) error {
 	}
 
 	opts := []config.AppOption{
+		config.WithContext(context.Background()),
 		config.WithConfigFile(r.ModelsConfigFile),
 		config.WithJSONStringPreload(r.PreloadModels),
 		config.WithYAMLConfigPreload(r.PreloadModelsConfig),
@@ -128,10 +130,21 @@ func (r *RunCMD) Run(ctx *cliContext.Context) error {
 		config.WithLoadToMemory(r.LoadToMemory),
 		config.WithMachineTag(r.MachineTag),
 		config.WithAPIAddress(r.Address),
+		config.WithAgentJobRetentionDays(r.AgentJobRetentionDays),
+		config.WithTunnelCallback(func(tunnels []string) {
+			tunnelEnvVar := strings.Join(tunnels, ",")
+			// TODO: this is very specific to llama.cpp, we should have a more generic way to set the environment variable
+			os.Setenv("LLAMACPP_GRPC_SERVERS", tunnelEnvVar)
+			log.Debug().Msgf("setting LLAMACPP_GRPC_SERVERS to %s", tunnelEnvVar)
+		}),
 	}
 
 	if r.DisableMetricsEndpoint {
 		opts = append(opts, config.DisableMetricsEndpoint)
+	}
+
+	if r.DisableRuntimeSettings {
+		opts = append(opts, config.DisableRuntimeSettings)
 	}
 
 	token := ""
@@ -152,7 +165,9 @@ func (r *RunCMD) Run(ctx *cliContext.Context) error {
 		opts = append(opts, config.WithP2PToken(token))
 	}
 
-	backgroundCtx := context.Background()
+	if r.Federated {
+		opts = append(opts, config.EnableFederated)
+	}
 
 	idleWatchDog := r.EnableWatchdogIdle
 	busyWatchDog := r.EnableWatchdogBusy
@@ -222,8 +237,10 @@ func (r *RunCMD) Run(ctx *cliContext.Context) error {
 		return err
 	}
 
-	if err := cli_api.StartP2PStack(backgroundCtx, r.Address, token, r.Peer2PeerNetworkID, r.Federated, app); err != nil {
-		return err
+	if token != "" {
+		if err := app.StartP2P(); err != nil {
+			return err
+		}
 	}
 
 	signals.RegisterGracefulTerminationHandler(func() {
@@ -232,5 +249,5 @@ func (r *RunCMD) Run(ctx *cliContext.Context) error {
 		}
 	})
 
-	return appHTTP.Listen(r.Address)
+	return appHTTP.Start(r.Address)
 }

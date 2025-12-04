@@ -2,68 +2,64 @@
 <html lang="en">
 {{template "views/partials/head" .}}
 
-<body class="bg-[#101827] text-[#E5E7EB]">
+<body class="bg-[var(--color-bg-primary)] text-[var(--color-text-primary)]">
 <div class="flex flex-col min-h-screen" x-data="modelsGallery()">
-   
+
     {{template "views/partials/navbar" .}}
-    
+
     <!-- Notifications -->
     <div class="fixed top-20 right-4 z-50 space-y-2" style="max-width: 400px;">
         <template x-for="notification in notifications" :key="notification.id">
             <div x-show="true" 
-                 x-transition:enter="transform ease-out duration-300 transition"
-                 x-transition:enter-start="translate-x-full opacity-0"
-                 x-transition:enter-end="translate-x-0 opacity-100"
-                 x-transition:leave="transform ease-in duration-200 transition"
-                 x-transition:leave-start="translate-x-0 opacity-100"
-                 x-transition:leave-end="translate-x-full opacity-0"
-                 :class="notification.type === 'error' ? 'bg-red-500' : 'bg-green-500'"
-                 class="rounded-lg shadow-xl p-4 text-white flex items-start space-x-3">
+                 x-transition:enter="transition ease-out duration-200"
+                 x-transition:enter-start="opacity-0"
+                 x-transition:enter-end="opacity-100"
+                 x-transition:leave="transition ease-in duration-150"
+                 x-transition:leave-start="opacity-100"
+                 x-transition:leave-end="opacity-0"
+                 :class="notification.type === 'error' ? 'bg-[var(--color-error)]' : 'bg-[var(--color-success)]'"
+                 class="rounded-lg p-4 text-white flex items-start space-x-3">
                 <div class="flex-shrink-0">
                     <i :class="notification.type === 'error' ? 'fas fa-exclamation-circle' : 'fas fa-check-circle'" class="text-xl"></i>
                 </div>
                 <div class="flex-1 min-w-0">
                     <p class="text-sm font-medium break-words" x-text="notification.message"></p>
                 </div>
-                <button @click="dismissNotification(notification.id)" class="flex-shrink-0 text-white hover:text-gray-200">
+                <button @click="dismissNotification(notification.id)" class="flex-shrink-0 text-white hover:opacity-80 transition-opacity">
                     <i class="fas fa-times"></i>
                 </button>
             </div>
         </template>
     </div>
-    
+
     <div class="container mx-auto px-4 py-8 flex-grow">
 
         <!-- Hero Header -->
-        <div class="relative bg-[#1E293B] border border-[#38BDF8]/20 rounded-3xl shadow-2xl shadow-[#38BDF8]/10 p-8 mb-12 overflow-hidden">
-            <!-- Background Pattern -->
-            <div class="absolute inset-0 opacity-10">
-                <div class="absolute inset-0 bg-gradient-to-r from-[#38BDF8]/20 to-[#8B5CF6]/20"></div>
-                <div class="absolute top-0 left-0 w-full h-full" style="background-image: radial-gradient(circle at 1px 1px, rgba(56,189,248,0.15) 1px, transparent 0); background-size: 20px 20px;"></div>
-            </div>
-            
-            <div class="relative max-w-5xl mx-auto text-center">
-                <h1 class="text-4xl md:text-5xl font-bold text-[#E5E7EB] mb-4">
-                    <span class="bg-clip-text text-transparent bg-gradient-to-r from-[#38BDF8] via-[#8B5CF6] to-[#38BDF8]">
-                        Model Gallery
-                    </span>
+        <div class="hero-section">
+            <div class="hero-content">
+                <h1 class="hero-title">
+                    Model Gallery
                 </h1>
-                <p class="text-lg md:text-xl text-gray-300 mb-6 font-light">
+                <p class="hero-subtitle">
                     Discover and install AI models from our curated collection
                 </p>
                 <div class="flex flex-wrap justify-center items-center gap-6 text-sm md:text-base">
-                    <div class="flex items-center bg-white/10 rounded-full px-4 py-2">
-                        <div class="w-2 h-2 bg-indigo-400 rounded-full mr-2 animate-pulse"></div>
+                    <div class="flex items-center bg-[var(--color-bg-primary)] rounded-lg px-4 py-2">
+                        <div class="w-2 h-2 bg-[var(--color-primary)] rounded-full mr-2"></div>
                         <span class="font-semibold text-indigo-300" x-text="availableModels"></span>
-                        <span class="text-gray-300 ml-1">models available</span>
+                        <span class="text-[var(--color-text-secondary)] ml-1">models available</span>
                     </div>
-                    <div class="flex items-center bg-white/10 rounded-full px-4 py-2">
-                        <div class="w-2 h-2 bg-purple-400 rounded-full mr-2 animate-pulse"></div>
+                    <a href="/manage" class="flex items-center bg-[var(--color-bg-primary)] hover:bg-[var(--color-bg-secondary)] rounded-lg px-4 py-2 transition-colors border border-[var(--color-primary-border)]/30 hover:border-[var(--color-primary-border)]/50">
+                        <div class="w-2 h-2 bg-[var(--color-success)] rounded-full mr-2"></div>
+                        <span class="font-semibold text-[var(--color-success)]" x-text="installedModels"></span>
+                        <span class="text-[var(--color-text-secondary)] ml-1">installed</span>
+                    </a>
+                    <div class="flex items-center bg-[var(--color-bg-primary)] rounded-lg px-4 py-2">
+                        <div class="w-2 h-2 bg-[var(--color-accent)] rounded-full mr-2"></div>
                         <span class="font-semibold text-purple-300" x-text="repositories.length"></span>
-                        <span class="text-gray-300 ml-1">repositories</span>
+                        <span class="text-[var(--color-text-secondary)] ml-1">repositories</span>
                     </div>
-                    <a href="https://localai.io/models/" target="_blank" 
-                       class="flex items-center bg-blue-600/80 hover:bg-blue-600 text-white px-4 py-2 rounded-full transition-all duration-300 hover:scale-105">
+                    <a href="https://localai.io/models/" target="_blank" class="btn-primary">
                         <i class="fas fa-info-circle mr-2"></i>
                         <span>Documentation</span>
                         <i class="fas fa-external-link-alt ml-2 text-xs"></i>
@@ -71,101 +67,100 @@
                 </div>
             </div>
         </div>
-        
+
         {{template "views/partials/inprogress" .}}
 
         <!-- Search and Filter Section -->
-        <div class="relative bg-gradient-to-br from-gray-800/80 to-gray-900/80 rounded-2xl p-8 mb-8 shadow-xl border border-gray-700/50 backdrop-blur-sm">
-            <div class="absolute inset-0 rounded-2xl bg-gradient-to-br from-blue-500/5 to-purple-500/5"></div>
-            
-            <div class="relative">
+        <div class="card p-8 mb-8">
+            <div>
                 <!-- Search Input -->
                 <div class="mb-8">
-                    <h3 class="text-xl font-semibold text-white mb-4 flex items-center">
-                        <i class="fas fa-search mr-3 text-blue-400"></i>
+                    <h3 class="text-xl font-semibold text-[var(--color-text-primary)] mb-4 flex items-center">
+                        <i class="fas fa-search mr-3 text-[var(--color-primary)]"></i>
                         Find Your Perfect Model
                     </h3>
                     <div class="relative">
-                        <div class="absolute inset-y-0 start-0 flex items-center ps-4 pointer-events-none">
-                            <i class="fas fa-search text-gray-400"></i>
+                        <div class="absolute inset-y-0 start-0 flex items-center ps-4 pointer-events-none z-10">
+                            <i class="fas fa-search text-[var(--color-text-secondary)]"></i>
                         </div>
-                        <input 
+                        <input
                             x-model="searchTerm"
                             @input.debounce.500ms="fetchModels()"
-                            class="w-full pl-12 pr-16 py-4 text-base font-normal text-gray-300 bg-gray-900/90 border border-gray-700/70 rounded-xl transition-all duration-300 focus:text-gray-200 focus:bg-gray-900 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/50 focus:outline-none" 
-                            type="search" 
+                            class="input w-full pr-16 py-4"
+                            style="padding-left: 3.5rem !important;"
+                            type="search"
                             placeholder="Search models by name, tag, or description...">
                         <span class="absolute right-4 top-4" x-show="loading">
-                            <svg class="animate-spin h-6 w-6 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <svg class="animate-spin h-6 w-6 text-[var(--color-primary)]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                                 <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                             </svg>
                         </span>
                     </div>
                 </div>
-                
+
                 <!-- Filter by Type -->
                 <div class="mb-8">
-                    <h3 class="text-lg font-semibold text-white mb-4 flex items-center">
-                        <i class="fas fa-filter mr-3 text-purple-400"></i>
+                    <h3 class="text-lg font-semibold text-[var(--color-text-primary)] mb-4 flex items-center">
+                        <i class="fas fa-filter mr-3 text-[var(--color-accent)]"></i>
                         Filter by Model Type
                     </h3>
                     <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-8 gap-3">
                         <button @click="filterByTerm('tts')"
-                            class="group flex items-center justify-center rounded-xl px-4 py-3 text-sm font-semibold bg-gradient-to-r from-indigo-600/80 to-indigo-700/80 hover:from-indigo-600 hover:to-indigo-700 text-indigo-100 border border-indigo-500/30 hover:border-indigo-400/50 transition-all duration-300 transform hover:scale-105 hover:shadow-lg hover:shadow-indigo-500/25">
-                            <i class="fas fa-microphone mr-2 group-hover:animate-pulse"></i>
+                            class="flex items-center justify-center rounded-lg px-4 py-3 text-sm font-semibold bg-[var(--color-bg-secondary)] hover:bg-[var(--color-primary-light)] text-[var(--color-text-primary)] border border-[var(--color-border-subtle)] hover:border-[var(--color-primary-border)] transition-colors">
+                            <i class="fas fa-microphone mr-2"></i>
                             <span>TTS</span>
                         </button>
                         <button @click="filterByTerm('stablediffusion')"
-                            class="group flex items-center justify-center rounded-xl px-4 py-3 text-sm font-semibold bg-gradient-to-r from-purple-600/80 to-purple-700/80 hover:from-purple-600 hover:to-purple-700 text-purple-100 border border-purple-500/30 hover:border-purple-400/50 transition-all duration-300 transform hover:scale-105 hover:shadow-lg hover:shadow-purple-500/25">
-                            <i class="fas fa-image mr-2 group-hover:animate-pulse"></i>
+                            class="flex items-center justify-center rounded-lg px-4 py-3 text-sm font-semibold bg-[var(--color-bg-secondary)] hover:bg-[var(--color-accent-light)] text-[var(--color-text-primary)] border border-[var(--color-border-subtle)] hover:border-[var(--color-accent-border)] transition-colors">
+                            <i class="fas fa-image mr-2"></i>
                             <span>Image</span>
                         </button>
                         <button @click="filterByTerm('llm')"
-                            class="group flex items-center justify-center rounded-xl px-4 py-3 text-sm font-semibold bg-gradient-to-r from-blue-600/80 to-blue-700/80 hover:from-blue-600 hover:to-blue-700 text-blue-100 border border-blue-500/30 hover:border-blue-400/50 transition-all duration-300 transform hover:scale-105 hover:shadow-lg hover:shadow-blue-500/25">
-                            <i class="fas fa-comment-alt mr-2 group-hover:animate-bounce"></i>
+                            class="flex items-center justify-center rounded-lg px-4 py-3 text-sm font-semibold bg-[var(--color-bg-secondary)] hover:bg-[var(--color-primary-light)] text-[var(--color-text-primary)] border border-[var(--color-border-subtle)] hover:border-[var(--color-primary-border)] transition-colors">
+                            <i class="fas fa-comment-alt mr-2"></i>
                             <span>LLM</span>
                         </button>
                         <button @click="filterByTerm('multimodal')"
-                            class="group flex items-center justify-center rounded-xl px-4 py-3 text-sm font-semibold bg-gradient-to-r from-green-600/80 to-green-700/80 hover:from-green-600 hover:to-green-700 text-green-100 border border-green-500/30 hover:border-green-400/50 transition-all duration-300 transform hover:scale-105 hover:shadow-lg hover:shadow-green-500/25">
-                            <i class="fas fa-object-group mr-2 group-hover:animate-pulse"></i>
+                            class="flex items-center justify-center rounded-lg px-4 py-3 text-sm font-semibold bg-[var(--color-bg-secondary)] hover:bg-[var(--color-secondary-light)] text-[var(--color-text-primary)] border border-[var(--color-border-subtle)] hover:border-[var(--color-secondary-light)] transition-colors">
+                            <i class="fas fa-object-group mr-2"></i>
                             <span>Multimodal</span>
                         </button>
                         <button @click="filterByTerm('embedding')"
-                            class="group flex items-center justify-center rounded-xl px-4 py-3 text-sm font-semibold bg-gradient-to-r from-cyan-600/80 to-cyan-700/80 hover:from-cyan-600 hover:to-cyan-700 text-cyan-100 border border-cyan-500/30 hover:border-cyan-400/50 transition-all duration-300 transform hover:scale-105 hover:shadow-lg hover:shadow-cyan-500/25">
-                            <i class="fas fa-vector-square mr-2 group-hover:animate-pulse"></i>
+                            class="flex items-center justify-center rounded-lg px-4 py-3 text-sm font-semibold bg-[var(--color-bg-secondary)] hover:bg-[var(--color-primary-light)] text-[var(--color-text-primary)] border border-[var(--color-border-subtle)] hover:border-[var(--color-primary-border)] transition-colors">
+                            <i class="fas fa-vector-square mr-2"></i>
                             <span>Embedding</span>
                         </button>
                         <button @click="filterByTerm('rerank')"
-                            class="group flex items-center justify-center rounded-xl px-4 py-3 text-sm font-semibold bg-gradient-to-r from-amber-600/80 to-amber-700/80 hover:from-amber-600 hover:to-amber-700 text-amber-100 border border-amber-500/30 hover:border-amber-400/50 transition-all duration-300 transform hover:scale-105 hover:shadow-lg hover:shadow-amber-500/25">
-                            <i class="fas fa-sort-amount-up mr-2 group-hover:animate-pulse"></i>
+                            class="flex items-center justify-center rounded-lg px-4 py-3 text-sm font-semibold bg-[var(--color-bg-secondary)] hover:bg-[var(--color-warning-light)] text-[var(--color-text-primary)] border border-[var(--color-border-subtle)] hover:border-[var(--color-warning-light)] transition-colors">
+                            <i class="fas fa-sort-amount-up mr-2"></i>
                             <span>Rerank</span>
                         </button>
                         <button @click="filterByTerm('whisper')"
-                            class="group flex items-center justify-center rounded-xl px-4 py-3 text-sm font-semibold bg-gradient-to-r from-teal-600/80 to-teal-700/80 hover:from-teal-600 hover:to-teal-700 text-teal-100 border border-teal-500/30 hover:border-teal-400/50 transition-all duration-300 transform hover:scale-105 hover:shadow-lg hover:shadow-teal-500/25">
-                            <i class="fas fa-headphones mr-2 group-hover:animate-pulse"></i>
+                            class="flex items-center justify-center rounded-lg px-4 py-3 text-sm font-semibold bg-[var(--color-bg-secondary)] hover:bg-[var(--color-secondary-light)] text-[var(--color-text-primary)] border border-[var(--color-border-subtle)] hover:border-[var(--color-secondary-light)] transition-colors">
+                            <i class="fas fa-headphones mr-2"></i>
                             <span>Whisper</span>
                         </button>
                         <button @click="filterByTerm('object-detection')"
-                            class="group flex items-center justify-center rounded-xl px-4 py-3 text-sm font-semibold bg-gradient-to-r from-red-600/80 to-red-700/80 hover:from-red-600 hover:to-red-700 text-red-100 border border-red-500/30 hover:border-red-400/50 transition-all duration-300 transform hover:scale-105 hover:shadow-lg hover:shadow-red-500/25">
-                            <i class="fas fa-eye mr-2 group-hover:animate-pulse"></i>
+                            class="flex items-center justify-center rounded-lg px-4 py-3 text-sm font-semibold bg-red-600/20 hover:bg-red-600/30 text-red-300 border border-red-500/30 transition-colors">
+                            <i class="fas fa-eye mr-2"></i>
                             <span>Vision</span>
                         </button>
                     </div>
                 </div>
-                
+
                 <!-- Filter by Tags -->
                 <div x-show="allTags.length > 0">
-                    <h3 class="text-lg font-semibold text-white mb-4 flex items-center">
-                        <i class="fas fa-tags mr-3 text-pink-400"></i>
+                    <h3 class="text-lg font-semibold text-[var(--color-text-primary)] mb-4 flex items-center">
+                        <i class="fas fa-tags mr-3 text-[var(--color-accent)]"></i>
                         Browse by Tags
                     </h3>
-                    <div class="max-h-32 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-600/50 scrollbar-track-gray-800/50 pr-2">
+                    <div class="max-h-32 overflow-y-auto pr-2">
                         <div class="flex flex-wrap gap-2">
                             <template x-for="tag in allTags" :key="tag">
                                 <button @click="filterByTerm(tag)"
-                                    class="group inline-flex items-center text-xs px-3 py-2 rounded-full bg-gray-700/60 hover:bg-gray-600/80 text-gray-300 hover:text-white border border-gray-600/50 hover:border-gray-500/70 transition-all duration-200 ease-in-out transform hover:scale-105">
-                                    <i class="fas fa-tag text-xs mr-2 group-hover:animate-pulse"></i>
+                                    class="inline-flex items-center text-xs px-3 py-2 rounded bg-[var(--color-bg-primary)] hover:bg-[var(--color-bg-primary)]/80 text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] border border-[var(--color-bg-secondary)] transition-colors">
+                                    <i class="fas fa-tag text-xs mr-2"></i>
                                     <span x-text="tag"></span>
                                 </button>
                             </template>
@@ -178,111 +173,115 @@
         <!-- Results Section -->
         <div id="search-results" class="transition-all duration-300">
             <div x-show="loading && models.length === 0" class="text-center py-12">
-                <svg class="animate-spin h-12 w-12 text-blue-500 mx-auto mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <svg class="animate-spin h-12 w-12 text-[var(--color-primary)] mx-auto mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                     <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                     <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                 </svg>
-                <p class="text-gray-400">Loading models...</p>
+                <p class="text-[var(--color-text-secondary)]">Loading models...</p>
             </div>
 
             <div x-show="!loading && models.length === 0" class="text-center py-12">
-                <i class="fas fa-search text-gray-500 text-4xl mb-4"></i>
-                <p class="text-gray-400">No models found matching your criteria</p>
+                <i class="fas fa-search text-[var(--color-text-muted)] text-4xl mb-4"></i>
+                <p class="text-[var(--color-text-secondary)]">No models found matching your criteria</p>
             </div>
 
             <!-- Table View -->
-            <div x-show="models.length > 0" class="bg-[#1E293B] rounded-2xl border border-[#38BDF8]/20 overflow-hidden shadow-xl backdrop-blur-sm">
+            <div x-show="models.length > 0" class="card overflow-hidden">
                 <div class="overflow-x-auto">
                     <table class="w-full">
                         <thead>
-                            <tr class="bg-gradient-to-r from-[#38BDF8]/20 to-[#8B5CF6]/20 border-b border-[#38BDF8]/30">
-                                <th class="px-6 py-4 text-left text-xs font-semibold text-[#E5E7EB] uppercase tracking-wider">Icon</th>
-                                <th class="px-6 py-4 text-left text-xs font-semibold text-[#E5E7EB] uppercase tracking-wider">Model Name</th>
-                                <th class="px-6 py-4 text-left text-xs font-semibold text-[#E5E7EB] uppercase tracking-wider">Description</th>
-                                <th class="px-6 py-4 text-left text-xs font-semibold text-[#E5E7EB] uppercase tracking-wider">Repository</th>
-                                <th class="px-6 py-4 text-left text-xs font-semibold text-[#E5E7EB] uppercase tracking-wider">License</th>
-                                <th class="px-6 py-4 text-left text-xs font-semibold text-[#E5E7EB] uppercase tracking-wider">Status</th>
-                                <th class="px-6 py-4 text-right text-xs font-semibold text-[#E5E7EB] uppercase tracking-wider">Actions</th>
+                            <tr class="bg-gradient-to-r from-[#38BDF8]/20 to-[#8B5CF6]/20 border-b border-[var(--color-primary-border)]/30">
+                                <th class="px-6 py-4 text-left text-xs font-semibold text-[var(--color-text-primary)] uppercase tracking-wider">Icon</th>
+                                <th class="px-6 py-4 text-left text-xs font-semibold text-[var(--color-text-primary)] uppercase tracking-wider">Model Name</th>
+                                <th class="px-6 py-4 text-left text-xs font-semibold text-[var(--color-text-primary)] uppercase tracking-wider">Description</th>
+                                <th class="px-6 py-4 text-left text-xs font-semibold text-[var(--color-text-primary)] uppercase tracking-wider">Repository</th>
+                                <th class="px-6 py-4 text-left text-xs font-semibold text-[var(--color-text-primary)] uppercase tracking-wider">License</th>
+                                <th class="px-6 py-4 text-left text-xs font-semibold text-[var(--color-text-primary)] uppercase tracking-wider">Status</th>
+                                <th class="px-6 py-4 text-right text-xs font-semibold text-[var(--color-text-primary)] uppercase tracking-wider">Actions</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-[#38BDF8]/20">
                             <template x-for="model in models" :key="model.id">
-                                <tr class="hover:bg-[#38BDF8]/10 transition-colors duration-200">
+                                <tr class="hover:bg-[var(--color-primary)]/10 transition-colors duration-200">
                                     <!-- Icon -->
                                     <td class="px-6 py-4">
-                                        <img :src="model.icon || 'https://upload.wikimedia.org/wikipedia/commons/6/65/No-Image-Placeholder.svg'" 
-                                             class="w-12 h-12 object-cover rounded-lg border border-[#38BDF8]/30"
-                                             loading="lazy"
-                                             :alt="model.name">
+                                        <div class="w-12 h-12 rounded-lg border border-[var(--color-primary-border)]/30 flex items-center justify-center bg-[var(--color-bg-primary)]">
+                                            <img x-show="model.icon"
+                                                 :src="model.icon"
+                                                 class="w-full h-full object-cover rounded-lg"
+                                                 loading="lazy"
+                                                 :alt="model.name">
+                                            <i x-show="!model.icon" class="fas fa-brain text-xl text-[var(--color-primary)]"></i>
+                                        </div>
                                     </td>
-                                    
+
                                     <!-- Model Name -->
                                     <td class="px-6 py-4">
                                         <div class="flex flex-col">
-                                            <span class="text-sm font-semibold text-[#E5E7EB]" x-text="model.name"></span>
+                                            <span class="text-sm font-semibold text-[var(--color-text-primary)]" x-text="model.name"></span>
                                             <div x-show="model.trustRemoteCode" class="mt-1">
-                                                <span class="inline-flex items-center text-xs px-2 py-1 rounded bg-red-500/20 text-red-300 border border-red-500/30">
+                                                <span class="inline-flex items-center text-xs px-2 py-1 rounded bg-[var(--color-error)]/20 text-[var(--color-error)] border border-[var(--color-error-light)]">
                                                     <i class="fa-solid fa-circle-exclamation mr-1"></i>
                                                     Trust Remote Code
                                                 </span>
                                             </div>
                                         </div>
                                     </td>
-                                    
+
                                     <!-- Description -->
                                     <td class="px-6 py-4">
-                                        <div class="text-sm text-[#94A3B8] max-w-xs truncate" x-text="model.description" :title="model.description"></div>
+                                        <div class="text-sm text-[var(--color-text-secondary)] max-w-xs truncate" x-text="model.description" :title="model.description"></div>
                                     </td>
-                                    
+
                                     <!-- Repository -->
                                     <td class="px-6 py-4">
-                                        <span class="inline-flex items-center text-xs px-2 py-1 rounded bg-[#38BDF8]/10 text-[#E5E7EB] border border-[#38BDF8]/30">
+                                        <span class="inline-flex items-center text-xs px-2 py-1 rounded bg-[var(--color-primary)]/10 text-[var(--color-text-primary)] border border-[var(--color-primary-border)]/30">
                                             <i class="fa-brands fa-git-alt mr-1"></i>
                                             <span x-text="model.gallery"></span>
                                         </span>
                                     </td>
-                                    
+
                                     <!-- License -->
                                     <td class="px-6 py-4">
-                                        <span x-show="model.license" class="inline-flex items-center text-xs px-2 py-1 rounded bg-[#8B5CF6]/10 text-[#E5E7EB] border border-[#8B5CF6]/30">
+                                        <span x-show="model.license" class="inline-flex items-center text-xs px-2 py-1 rounded bg-[var(--color-accent)]/10 text-[var(--color-text-primary)] border border-[var(--color-accent-border)]/30">
                                             <i class="fas fa-book mr-1"></i>
                                             <span x-text="model.license"></span>
                                         </span>
-                                        <span x-show="!model.license" class="text-xs text-[#94A3B8]">-</span>
+                                        <span x-show="!model.license" class="text-xs text-[var(--color-text-secondary)]">-</span>
                                     </td>
-                                    
+
                                     <!-- Status -->
                                     <td class="px-6 py-4">
                                         <!-- Processing State -->
                                         <div x-show="model.processing" class="min-w-[200px]">
-                                            <div class="text-xs font-medium text-[#E5E7EB] mb-1">
+                                            <div class="text-xs font-medium text-[var(--color-text-primary)] mb-1">
                                                 <span x-text="model.isDeletion ? 'Deleting...' : 'Installing...'"></span>
                                             </div>
-                                            <div x-show="(jobProgress[model.jobID] || 0) === 0" class="text-xs text-[#38BDF8]">
+                                            <div x-show="(jobProgress[model.jobID] || 0) === 0" class="text-xs text-[var(--color-primary)]">
                                                 <i class="fas fa-clock mr-1"></i>Queued
                                             </div>
                                             <div class="progress-table mt-1">
                                                 <div class="progress-bar-table" :style="'width:' + (jobProgress[model.jobID] || 0) + '%'"></div>
                                             </div>
                                         </div>
-                                        
+
                                         <!-- Installed State -->
                                         <div x-show="!model.processing && model.installed">
-                                            <span class="inline-flex items-center text-xs px-2 py-1 rounded bg-green-500/20 text-green-300 border border-green-500/30">
+                                            <span class="badge badge-success">
                                                 <i class="fas fa-check-circle mr-1"></i>
                                                 Installed
                                             </span>
                                         </div>
-                                        
+
                                         <!-- Not Installed State -->
                                         <div x-show="!model.processing && !model.installed">
-                                            <span class="inline-flex items-center text-xs px-2 py-1 rounded bg-[#1E293B] text-[#94A3B8] border border-[#38BDF8]/30">
+                                            <span class="badge">
                                                 <i class="fas fa-circle mr-1"></i>
                                                 Not Installed
                                             </span>
                                         </div>
                                     </td>
-                                    
+
                                     <!-- Actions -->
                                     <td class="px-6 py-4">
                                         <div class="flex items-center justify-end gap-2">
@@ -312,8 +311,8 @@
                                             <!-- Not Installed State Actions -->
                                             <template x-if="!model.processing && !model.installed">
                                                 <div class="flex gap-2">
-                                                    <button @click="getConfig(model.id)" 
-                                                            class="inline-flex items-center px-3 py-1.5 rounded-lg bg-[#8B5CF6]/20 hover:bg-[#8B5CF6]/40 text-xs font-medium text-[#E5E7EB] transition duration-200 border border-[#8B5CF6]/30"
+                                                    <button @click="getConfig(model.id)"
+                                                            class="inline-flex items-center px-3 py-1.5 rounded-lg bg-[var(--color-accent)]/20 hover:bg-[var(--color-accent)]/40 text-xs font-medium text-[var(--color-text-primary)] transition duration-200 border border-[var(--color-accent-border)]/30"
                                                             title="Get config">
                                                         <i class="fa-solid fa-file-code"></i>
                                                     </button>
@@ -334,7 +333,7 @@
             </div>
 
             <!-- Modal -->
-            <div x-show="selectedModel" 
+            <div x-show="selectedModel"
                  x-transition
                  @click.away="closeModal()"
                  class="fixed top-0 right-0 left-0 z-50 flex justify-center items-center w-full md:inset-0 h-full max-h-full bg-gray-900/50"
@@ -344,8 +343,8 @@
                         <!-- Modal Header -->
                         <div class="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600">
                             <h3 class="text-xl font-semibold text-gray-900 dark:text-white" x-text="selectedModel?.name"></h3>
-                            <button @click="closeModal()" 
-                                    class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white">
+                            <button @click="closeModal()"
+                                    class="text-[var(--color-text-secondary)] bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white">
                                 <svg class="w-3 h-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
                                     <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
                                 </svg>
@@ -355,11 +354,15 @@
                         <!-- Modal Body -->
                         <div class="p-4 md:p-5 space-y-4 overflow-y-auto flex-1 min-h-0">
                             <div class="flex justify-center items-center">
-                                <img :src="selectedModel?.icon || 'https://upload.wikimedia.org/wikipedia/commons/6/65/No-Image-Placeholder.svg'" 
-                                     class="lazy rounded-t-lg max-h-48 max-w-96 object-cover mt-3" 
-                                     loading="lazy">
+                                <div class="w-48 h-48 rounded-lg border border-gray-300 dark:border-gray-600 flex items-center justify-center bg-gray-100 dark:bg-gray-800 mt-3">
+                                    <img x-show="selectedModel?.icon"
+                                         :src="selectedModel?.icon"
+                                         class="rounded-lg max-h-48 max-w-96 object-cover"
+                                         loading="lazy">
+                                    <i x-show="!selectedModel?.icon" class="fas fa-brain text-6xl text-[var(--color-text-secondary)] dark:text-[var(--color-text-muted)]"></i>
+                                </div>
                             </div>
-                            <p class="text-base leading-relaxed text-gray-500 dark:text-gray-400" x-text="selectedModel?.description"></p>
+                            <div class="text-base leading-relaxed text-[var(--color-text-muted)] dark:text-[var(--color-text-secondary)] break-words max-w-full markdown-content" x-html="renderMarkdown(selectedModel?.description)"></div>
                             <hr>
                             <template x-if="selectedModel?.urls && selectedModel.urls.length > 0">
                                 <div>
@@ -367,10 +370,25 @@
                                     <ul>
                                         <template x-for="url in selectedModel.urls" :key="url">
                                             <li>
-                                                <a :href="url" target="_blank" class="text-base leading-relaxed text-gray-500 dark:text-gray-400 hover:text-blue-500">
+                                                <a :href="url" target="_blank" class="text-base leading-relaxed text-[var(--color-text-muted)] dark:text-[var(--color-text-secondary)] hover:text-[var(--color-primary)]">
                                                     <i class="fas fa-link pr-2"></i>
                                                     <span x-text="url"></span>
                                                 </a>
+                                            </li>
+                                        </template>
+                                    </ul>
+                                </div>
+                            </template>
+                            <template x-if="selectedModel?.additionalFiles && selectedModel.additionalFiles.length > 0">
+                                <div>
+                                    <p class="text-sm font-semibold text-gray-900 dark:text-white mb-2">Files</p>
+                                    <ul>
+                                        <template x-for="file in selectedModel.additionalFiles" :key="file">
+                                            <li class="mb-0">
+                                                <p class="text-base leading-tight text-[var(--color-text-muted)] dark:text-[var(--color-text-secondary)]">
+                                                    <i class="fas fa-file pr-2"></i>
+                                                    <span x-text="file.filename"></span>
+                                                </p>
                                             </li>
                                         </template>
                                     </ul>
@@ -393,8 +411,8 @@
                         </div>
                         <!-- Modal Footer -->
                         <div class="flex items-center p-4 md:p-5 border-t border-gray-200 rounded-b dark:border-gray-600">
-                            <button @click="closeModal()" 
-                                    class="py-2.5 px-5 ms-3 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-100 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700">
+                            <button @click="closeModal()"
+                                    class="py-2.5 px-5 ms-3 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-100 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-[var(--color-text-secondary)] dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700">
                                 Close
                             </button>
                         </div>
@@ -406,19 +424,19 @@
         <!-- Pagination -->
         <div x-show="totalPages > 1" class="flex justify-center mt-12">
             <div class="flex items-center gap-4 bg-gray-800/60 rounded-2xl p-4 backdrop-blur-sm border border-gray-700/50">
-                <button @click="goToPage(currentPage - 1)" 
+                <button @click="goToPage(currentPage - 1)"
                     :disabled="currentPage <= 1"
                     :class="currentPage <= 1 ? 'opacity-50 cursor-not-allowed' : ''"
-                    class="group flex items-center justify-center h-12 w-12 bg-gray-700/80 hover:bg-indigo-600 text-gray-300 hover:text-white rounded-xl shadow-lg transition-all duration-300 ease-in-out transform hover:scale-110">
-                    <i class="fas fa-chevron-left group-hover:animate-pulse"></i>
+                    class="flex items-center justify-center h-12 w-12 bg-[var(--color-bg-secondary)] hover:bg-indigo-600 text-[var(--color-text-secondary)] hover:text-white rounded-lg transition-colors">
+                    <i class="fas fa-chevron-left"></i>
                 </button>
                 <div class="text-gray-300 text-sm font-medium px-4">
-                    <span class="text-gray-400">Page</span>
+                    <span class="text-[var(--color-text-secondary)]">Page</span>
                     <span class="text-white font-bold text-lg mx-2" x-text="currentPage"></span>
-                    <span class="text-gray-400">of</span>
+                    <span class="text-[var(--color-text-secondary)]">of</span>
                     <span class="text-white font-bold text-lg mx-2" x-text="totalPages"></span>
                 </div>
-                <button @click="goToPage(currentPage + 1)" 
+                <button @click="goToPage(currentPage + 1)"
                     :disabled="currentPage >= totalPages"
                     :class="currentPage >= totalPages ? 'opacity-50 cursor-not-allowed' : ''"
                     class="group flex items-center justify-center h-12 w-12 bg-gray-700/80 hover:bg-indigo-600 text-gray-300 hover:text-white rounded-xl shadow-lg transition-all duration-300 ease-in-out transform hover:scale-110">
@@ -495,6 +513,42 @@ tbody tr:last-child td:first-child {
 tbody tr:last-child td:last-child {
     border-bottom-right-radius: 1rem;
 }
+
+/* Markdown content overflow handling */
+.markdown-content {
+    word-wrap: break-word;
+    overflow-wrap: anywhere;
+    max-width: 100%;
+}
+
+.markdown-content pre {
+    overflow-x: auto;
+    max-width: 100%;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+}
+
+.markdown-content code {
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+}
+
+.markdown-content pre code {
+    white-space: pre;
+    overflow-x: auto;
+    display: block;
+}
+
+.markdown-content table {
+    max-width: 100%;
+    overflow-x: auto;
+    display: block;
+}
+
+.markdown-content img {
+    max-width: 100%;
+    height: auto;
+}
 </style>
 
 <script>
@@ -508,27 +562,28 @@ function modelsGallery() {
         currentPage: 1,
         totalPages: 1,
         availableModels: 0,
+        installedModels: 0,
         selectedModel: null,
         jobProgress: {},
         notifications: [],
-        
+
         init() {
             this.fetchModels();
             // Poll for job progress every 600ms
             setInterval(() => this.pollJobs(), 600);
         },
-        
+
         addNotification(message, type = 'error') {
             const id = Date.now();
             this.notifications.push({ id, message, type });
             // Auto-dismiss after 10 seconds
             setTimeout(() => this.dismissNotification(id), 10000);
         },
-        
+
         dismissNotification(id) {
             this.notifications = this.notifications.filter(n => n.id !== id);
         },
-        
+
         async fetchModels() {
             this.loading = true;
             try {
@@ -539,33 +594,34 @@ function modelsGallery() {
                 });
                 const response = await fetch(`/api/models?${params}`);
                 const data = await response.json();
-                
+
                 this.models = data.models || [];
                 this.allTags = data.allTags || [];
                 this.repositories = data.repositories || [];
                 this.currentPage = data.currentPage || 1;
                 this.totalPages = data.totalPages || 1;
                 this.availableModels = data.availableModels || 0;
+                this.installedModels = data.installedModels || 0;
             } catch (error) {
                 console.error('Error fetching models:', error);
             } finally {
                 this.loading = false;
             }
         },
-        
+
         filterByTerm(term) {
             this.searchTerm = term;
             this.currentPage = 1;
             this.fetchModels();
         },
-        
+
         goToPage(page) {
             if (page >= 1 && page <= this.totalPages) {
                 this.currentPage = page;
                 this.fetchModels();
             }
         },
-        
+
         async installModel(modelId) {
             try {
                 const response = await fetch(`/api/models/install/${encodeURIComponent(modelId)}`, {
@@ -586,12 +642,12 @@ function modelsGallery() {
                 alert('Failed to start installation');
             }
         },
-        
+
         async deleteModel(modelId) {
             if (!confirm('Are you sure you wish to delete the model?')) {
                 return;
             }
-            
+
             try {
                 const response = await fetch(`/api/models/delete/${encodeURIComponent(modelId)}`, {
                     method: 'POST'
@@ -610,11 +666,11 @@ function modelsGallery() {
                 alert('Failed to start deletion');
             }
         },
-        
+
         async reinstallModel(modelId) {
             this.installModel(modelId);
         },
-        
+
         async getConfig(modelId) {
             try {
                 const response = await fetch(`/api/models/config/${encodeURIComponent(modelId)}`, {
@@ -627,24 +683,24 @@ function modelsGallery() {
                 alert('Failed to get configuration');
             }
         },
-        
+
         async pollJobs() {
             const processingModels = this.models.filter(m => m.processing && m.jobID);
-            
+
             for (const model of processingModels) {
                 try {
                     const response = await fetch(`/api/models/job/${model.jobID}`);
                     const jobData = await response.json();
-                    
+
                     // Handle queued status
                     if (jobData.queued) {
                         this.jobProgress[model.jobID] = 0;
                         // Keep processing state but don't show error
                         continue;
                     }
-                    
+
                     this.jobProgress[model.jobID] = jobData.progress || 0;
-                    
+
                     if (jobData.completed) {
                         model.processing = false;
                         model.installed = !jobData.deletion;
@@ -655,12 +711,34 @@ function modelsGallery() {
                         // Refresh the models list to get updated state
                         this.fetchModels();
                     }
-                    
-                    if (jobData.error) {
+
+                    if (jobData.error || (jobData.message && jobData.message.startsWith('error:'))) {
                         model.processing = false;
                         delete this.jobProgress[model.jobID];
                         const action = model.isDeletion ? 'deleting' : 'installing';
-                        this.addNotification(`Error ${action} model "${model.name}": ${jobData.error}`, 'error');
+                        // Extract error message - handle both string and object errors
+                        let errorMessage = 'Unknown error';
+                        if (typeof jobData.error === 'string') {
+                            errorMessage = jobData.error;
+                        } else if (jobData.error && typeof jobData.error === 'object') {
+                            // Check if error object has any properties
+                            const errorKeys = Object.keys(jobData.error);
+                            if (errorKeys.length > 0) {
+                                // Try common error object properties
+                                errorMessage = jobData.error.message || jobData.error.error || jobData.error.Error || JSON.stringify(jobData.error);
+                            } else {
+                                // Empty object {}, fall back to message field
+                                errorMessage = jobData.message || 'Unknown error';
+                            }
+                        } else if (jobData.message) {
+                            // Use message field if error is not present or is empty
+                            errorMessage = jobData.message;
+                        }
+                        // Remove "error: " prefix if present
+                        if (errorMessage.startsWith('error: ')) {
+                            errorMessage = errorMessage.substring(7);
+                        }
+                        this.addNotification(`Error ${action} model "${model.name}": ${errorMessage}`, 'error');
                     }
                 } catch (error) {
                     console.error('Error polling job:', error);
@@ -668,11 +746,25 @@ function modelsGallery() {
                 }
             }
         },
-        
+
+        renderMarkdown(text) {
+            if (!text) return '';
+            try {
+                if (typeof marked === 'undefined' || typeof DOMPurify === 'undefined') {
+                    return text; // Return plain text if libraries not loaded
+                }
+                const html = marked.parse(text);
+                return DOMPurify.sanitize(html);
+            } catch (error) {
+                console.error('Error rendering markdown:', error);
+                return text;
+            }
+        },
+
         openModal(model) {
             this.selectedModel = model;
         },
-        
+
         closeModal() {
             this.selectedModel = null;
         }

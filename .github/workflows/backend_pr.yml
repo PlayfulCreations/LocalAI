@@ -17,7 +17,7 @@ jobs:
       has-backends-darwin: ${{ steps.set-matrix.outputs.has-backends-darwin }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: Setup Bun
         uses: oven-sh/setup-bun@v2
@@ -52,6 +52,7 @@ jobs:
       dockerfile: ${{ matrix.dockerfile }}
       skip-drivers: ${{ matrix.skip-drivers }}
       context: ${{ matrix.context }}
+      ubuntu-version: ${{ matrix.ubuntu-version }}
     secrets:
       quayUsername: ${{ secrets.LOCALAI_REGISTRY_USERNAME }}
       quayPassword: ${{ secrets.LOCALAI_REGISTRY_PASSWORD }}

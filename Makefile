@@ -4,6 +4,9 @@ GOVET=$(GOCMD) vet
 BINARY_NAME=local-ai
 LAUNCHER_BINARY_NAME=local-ai-launcher
 
+CUDA_MAJOR_VERSION?=13
+CUDA_MINOR_VERSION?=0
+
 GORELEASER?=
 
 export BUILD_TYPE?=
@@ -102,6 +105,10 @@ build-launcher: ## Build the launcher application
 	CGO_LDFLAGS="$(CGO_LDFLAGS)" $(GOCMD) build -ldflags "$(LD_FLAGS)" -tags "$(GO_TAGS)" -o $(LAUNCHER_BINARY_NAME) ./cmd/launcher
 
 build-all: build build-launcher ## Build both server and launcher
+
+build-dev: ## Run LocalAI in dev mode with live reload
+	@command -v air >/dev/null 2>&1 || go install github.com/air-verse/air@latest
+	air -c .air.toml
 
 dev-dist:
 	$(GORELEASER) build --snapshot --clean
@@ -379,6 +386,9 @@ backends/llama-cpp-darwin: build
 backends/neutts: docker-build-neutts docker-save-neutts build
 	./local-ai backends install "ocifile://$(abspath ./backend-images/neutts.tar)"
 
+backends/vllm: docker-build-vllm docker-save-vllm build
+	./local-ai backends install "ocifile://$(abspath ./backend-images/vllm.tar)"
+
 build-darwin-python-backend: build
 	bash ./scripts/build/python-darwin.sh
 
@@ -444,6 +454,12 @@ docker-save-neutts: backend-images
 docker-build-kokoro:
 	docker build --build-arg BUILD_TYPE=$(BUILD_TYPE) --build-arg BASE_IMAGE=$(BASE_IMAGE) -t local-ai-backend:kokoro -f backend/Dockerfile.python --build-arg BACKEND=kokoro ./backend
 
+docker-build-vllm:
+	docker build --build-arg CUDA_MAJOR_VERSION=$(CUDA_MAJOR_VERSION) --build-arg CUDA_MINOR_VERSION=$(CUDA_MINOR_VERSION) --build-arg BUILD_TYPE=$(BUILD_TYPE) --build-arg BASE_IMAGE=$(BASE_IMAGE) -t local-ai-backend:vllm -f backend/Dockerfile.python --build-arg BACKEND=vllm ./backend
+
+docker-save-vllm: backend-images
+	docker save local-ai-backend:vllm -o backend-images/vllm.tar
+
 docker-save-kokoro: backend-images
 	docker save local-ai-backend:kokoro -o backend-images/kokoro.tar
 
@@ -479,9 +495,6 @@ docker-save-stablediffusion-ggml: backend-images
 
 docker-build-rerankers:
 	docker build --build-arg BUILD_TYPE=$(BUILD_TYPE) --build-arg BASE_IMAGE=$(BASE_IMAGE) -t local-ai-backend:rerankers -f backend/Dockerfile.python --build-arg BACKEND=rerankers .
-
-docker-build-vllm:
-	docker build --build-arg BUILD_TYPE=$(BUILD_TYPE) --build-arg BASE_IMAGE=$(BASE_IMAGE) -t local-ai-backend:vllm -f backend/Dockerfile.python --build-arg BACKEND=vllm .
 
 docker-build-transformers:
 	docker build --build-arg BUILD_TYPE=$(BUILD_TYPE) --build-arg BASE_IMAGE=$(BASE_IMAGE) -t local-ai-backend:transformers -f backend/Dockerfile.python --build-arg BACKEND=transformers .

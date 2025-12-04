@@ -20,7 +20,7 @@
 #   API_KEY       - API key for securing LocalAI access (default: none)
 #   PORT          - Port to run LocalAI on (default: 8080)
 #   THREADS       - Number of CPU threads to use (default: auto-detected)
-#   MODELS_PATH   - Path to store models (default: /usr/share/local-ai/models)
+#   MODELS_PATH   - Path to store models (default: /var/lib/local-ai/models)
 #   CORE_IMAGES   - Set to "true" to download core LocalAI images (default: false)
 #   P2P_TOKEN     - Token for P2P federation/worker mode (default: none)
 #   WORKER        - Set to "true" to run as a worker node (default: false)
@@ -39,19 +39,26 @@ RED='\033[38;5;196m'
 BOLD='\033[1m'
 RESET='\033[0m'
 
+ECHO=`which echo || true`
+if [ -z "$ECHO" ]; then
+    ECHO=echo
+else
+    ECHO="$ECHO -e"
+fi
+
 info()
 {
-    echo -e "${BOLD}${LIGHT_BLUE}" '[INFO] ' "$@" "${RESET}"
+    ${ECHO} "${BOLD}${LIGHT_BLUE}" '[INFO] ' "$@" "${RESET}"
 }
 
 warn()
 {
-    echo -e "${BOLD}${ORANGE}" '[WARN] ' "$@" "${RESET}" >&2
+    ${ECHO} "${BOLD}${ORANGE}" '[WARN] ' "$@" "${RESET}" >&2
 }
 
 fatal()
 {
-    echo -e "${BOLD}${RED}" '[ERROR] ' "$@" "${RESET}" >&2
+    ${ECHO} "${BOLD}${RED}" '[ERROR] ' "$@" "${RESET}" >&2
     exit 1
 }
 
@@ -59,17 +66,17 @@ fatal()
 # like the logging functions, but with the -n flag to prevent the new line and keep the cursor in line for choices inputs like y/n
 choice_info()
 {
-    echo -e -n "${BOLD}${LIGHT_BLUE}" '[INFO] ' "$@" "${RESET}"
+    ${ECHO} -n "${BOLD}${LIGHT_BLUE}" '[INFO] ' "$@" "${RESET}"
 }
 
 choice_warn()
 {
-    echo -e -n "${BOLD}${ORANGE}" '[WARN] ' "$@" "${RESET}" >&2
+    ${ECHO} -n "${BOLD}${ORANGE}" '[WARN] ' "$@" "${RESET}" >&2
 }
 
 choice_fatal()
 {
-    echo -e -n "${BOLD}${RED}" '[ERROR] ' "$@" "${RESET}" >&2
+    ${ECHO} -n "${BOLD}${RED}" '[ERROR] ' "$@" "${RESET}" >&2
     exit 1
 }
 
@@ -137,15 +144,10 @@ uninstall_localai() {
         fi
     done
 
-    # Remove models directory
-    if [ -d "/usr/share/local-ai" ]; then
-        info "Removing LocalAI data directory..."
-        $SUDO rm -rf /usr/share/local-ai
-    fi
-
-    # Remove local-ai user if it exists
+    # Remove local-ai user and all its data if it exists
     if id local-ai >/dev/null 2>&1; then
-        info "Removing local-ai user..."
+        info "Removing local-ai user and all its data..."
+        $SUDO gpasswd -d $(whoami) local-ai
         $SUDO userdel -r local-ai || true
     fi
 
@@ -190,7 +192,7 @@ fi
 THREADS=${THREADS:-$procs}
 LATEST_VERSION=$(curl -s "https://api.github.com/repos/mudler/LocalAI/releases/latest" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
 LOCALAI_VERSION="${LOCALAI_VERSION:-$LATEST_VERSION}" #changed due to VERSION beign already defined in Fedora 42 Cloud Edition
-MODELS_PATH=${MODELS_PATH:-/usr/share/local-ai/models}
+MODELS_PATH=${MODELS_PATH:-/var/lib/local-ai/models}
 
 
 check_gpu() {
@@ -232,7 +234,10 @@ trap aborted INT
 configure_systemd() {
     if ! id local-ai >/dev/null 2>&1; then
         info "Creating local-ai user..."
-        $SUDO useradd -r -s /bin/false -U -m -d /usr/share/local-ai local-ai
+        $SUDO useradd -r -s /bin/false -U -M -d /var/lib/local-ai local-ai
+        $SUDO mkdir -p /var/lib/local-ai
+        $SUDO chmod 0755 /var/lib/local-ai
+        $SUDO chown local-ai:local-ai /var/lib/local-ai
     fi
 
     info "Adding current user to local-ai group..."
@@ -251,7 +256,7 @@ Restart=always
 EnvironmentFile=/etc/localai.env
 RestartSec=3
 Environment="PATH=$PATH"
-WorkingDirectory=/usr/share/local-ai
+WorkingDirectory=/var/lib/local-ai
 
 [Install]
 WantedBy=default.target
@@ -358,12 +363,11 @@ enable_selinux_container_booleans() {
 install_container_toolkit_apt() {
     info 'Installing NVIDIA container toolkit repository...'
 
-    curl -fsSL https://nvidia.github.io/libnvidia-container/gpgkey | $SUDO gpg --dearmor -o /usr/share/keyrings/nvidia-container-toolkit-keyring.gpg \
+    curl -fsSL https://nvidia.github.io/libnvidia-container/gpgkey | $SUDO gpg --dearmor -o /etc/apt/trusted.gpg.d/nvidia-container-toolkit-keyring.gpg \
   && curl -s -L https://nvidia.github.io/libnvidia-container/stable/deb/nvidia-container-toolkit.list | \
-    sed 's#deb https://#deb [signed-by=/usr/share/keyrings/nvidia-container-toolkit-keyring.gpg] https://#g' | \
     $SUDO tee /etc/apt/sources.list.d/nvidia-container-toolkit.list
 
-    $SUDO sudo apt-get update && $SUDO apt-get install -y nvidia-container-toolkit
+    $SUDO apt-get update && $SUDO apt-get install -y nvidia-container-toolkit
 }
 
 # ref: https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html#installing-with-zypper
@@ -856,6 +860,16 @@ detect_start_command() {
     fi
 }
 
+SUDO=
+if [ "$(id -u)" -ne 0 ]; then
+    # Running as root, no need for sudo
+    if ! available sudo; then
+        fatal "This script requires superuser permissions. Please re-run as root."
+    fi
+
+    SUDO="sudo"
+fi
+
 # Check if uninstall flag is provided
 if [ "$1" = "--uninstall" ]; then
     uninstall_localai
@@ -887,16 +901,6 @@ fi
 
 if check_gpu lspci intel || check_gpu lshw intel; then
     HAS_INTEL=true
-fi
-
-SUDO=
-if [ "$(id -u)" -ne 0 ]; then
-    # Running as root, no need for sudo
-    if ! available sudo; then
-        fatal "This script requires superuser permissions. Please re-run as root."
-    fi
-
-    SUDO="sudo"
 fi
 
 PACKAGE_MANAGER=
