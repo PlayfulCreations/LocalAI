@@ -506,8 +506,8 @@ github.com/morikuni/aec v1.0.0/go.mod h1:BbKIizmSmc5MMPqRYbxO4ZU0S0+P200+tUnFx7P
 github.com/mr-tron/base58 v1.1.2/go.mod h1:BinMc/sQntlIE1frQmRFPUoPA1Zkr8VRgBdjWI2mNwc=
 github.com/mr-tron/base58 v1.2.0 h1:T/HDJBh4ZCPbU39/+c3rRvE0uKBQlU27+QI8LJ4t64o=
 github.com/mr-tron/base58 v1.2.0/go.mod h1:BinMc/sQntlIE1frQmRFPUoPA1Zkr8VRgBdjWI2mNwc=
-github.com/mudler/cogito v0.6.0 h1:jn6gO18Wcyfhcfe1CPjl0FCG3S1LBLrLf7LVPxpRPic=
-github.com/mudler/cogito v0.6.0/go.mod h1:2uhEElCTq8eXSsqJ1JF01oA5h9niXSELVKqCF1PqjEw=
+github.com/mudler/cogito v0.7.2 h1:J5eHZPsxpoKcnYUfogje5u0nnzGww7ytv7nSn1DMpms=
+github.com/mudler/cogito v0.7.2/go.mod h1:6sfja3lcu2nWRzEc0wwqGNu/eCG3EWgij+8s7xyUeQ4=
 github.com/mudler/edgevpn v0.31.1 h1:7qegiDWd0kAg6ljhNHxqvp8hbo/6BbzSdbb7/2WZfiY=
 github.com/mudler/edgevpn v0.31.1/go.mod h1:ftV5B0nKFzm4R8vR80UYnCb2nf7lxCRgAALxUEEgCf8=
 github.com/mudler/go-piper v0.0.0-20241023091659-2494246fd9fc h1:RxwneJl1VgvikiX28EkpdAyL4yQVnJMrbquKospjHyA=
@@ -516,6 +516,8 @@ github.com/mudler/go-processmanager v0.0.0-20240820160718-8b802d3ecf82 h1:FVT07E
 github.com/mudler/go-processmanager v0.0.0-20240820160718-8b802d3ecf82/go.mod h1:Urp7LG5jylKoDq0663qeBh0pINGcRl35nXdKx82PSoU=
 github.com/mudler/water v0.0.0-20250808092830-dd90dcf09025 h1:WFLP5FHInarYGXi6B/Ze204x7Xy6q/I4nCZnWEyPHK0=
 github.com/mudler/water v0.0.0-20250808092830-dd90dcf09025/go.mod h1:QuIFdRstyGJt+MTTkWY+mtD7U6xwjOR6SwKUjmLZtR4=
+github.com/mudler/xlog v0.0.1 h1:yR3/wszd3ZM6u1n96YITJZ4yUcDgqHSwvQmzUJa+8vg=
+github.com/mudler/xlog v0.0.1/go.mod h1:39f5vcd05Qd6GWKM8IjyHNQ7AmOx3ZM0YfhfIGhC18U=
 github.com/muesli/reflow v0.3.0 h1:IFsN6K9NfGtjeggFP+68I4chLZV2yIKsXJFNZ+eWh6s=
 github.com/muesli/reflow v0.3.0/go.mod h1:pbwTDkVPibjO2kyvBQRBxTWEEGDGq0FlB1BIKtnHY/8=
 github.com/muesli/termenv v0.16.0 h1:S5AlUN9dENB57rsbnkPyfdGuWIlkmzJjbFf0Tf5FWUc=
