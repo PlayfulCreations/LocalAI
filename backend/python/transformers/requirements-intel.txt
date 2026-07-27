@@ -9,5 +9,5 @@ transformers
 intel-extension-for-transformers
 bitsandbytes
 outetts
-sentence-transformers==5.6.0
+sentence-transformers==5.6.1
 protobuf==7.35.1
