@@ -8,4 +8,4 @@ bitsandbytes
 outetts
 bitsandbytes
 sentence-transformers==5.7.0
-protobuf==7.35.1
+protobuf==7.36.0
